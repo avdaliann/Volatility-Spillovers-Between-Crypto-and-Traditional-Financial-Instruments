@@ -1,4 +1,4 @@
-#1
+#1 Տվյալների հավաքագրում, ֆիլտրացիա և զույգային կորելացիոն վերլուծություն
 """
 ԿՐԻՊՏՈԱԿՏԻՎՆԵՐԻ ՇՈՒԿԱ — ԱՄԲՈՂՋԱԿԱՆ ԶՈՒՅԳԱՅԻՆ ԿՈՐԵԼԱՑԻՈՆ ՎԵՐԼՈՒԾՈՒԹՅՈՒՆ
 Լավագույն 300 ակտիվները | 2018-01-01 - 2026-01-01 
@@ -686,7 +686,7 @@ if __name__ == "__main__":
     main()
 
 
-# 2
+#2 Հիմնական ակտիվների տվյալների նախապատրաստում և վիճակագրական դիագնոստիկա
 
 import pandas as pd
 import numpy as np
@@ -717,10 +717,10 @@ print("Ներբեռնվում են 7 հիմնական ակտիվների տվյ�
 raw_data = yf.download(list(tickers.values()), start=start_date, end=end_date, progress=False)['Close']
 raw_data.rename(columns={v: k for k, v in tickers.items()}, inplace=True)
 
-# 2. Տվյալների սինխրոնիզացիա (Inner Join մեթոդաբանություն)
+# Տվյալների սինխրոնիզացիա (Inner Join մեթոդաբանություն)
 aligned_prices = raw_data.dropna()
 
-# 3. Եկամտաբերությունների հաշվարկ
+# Եկամտաբերությունների հաշվարկ
 # Սկզբից հաշվում ենք լոգ-եկամտաբերություն բոլորի համար
 log_returns = np.log(aligned_prices / aligned_prices.shift(1)) * 100
 # ԱՊԱ US10Y-ը. վերագրում ենք միայն բացարձակ տարբերությունը
@@ -730,7 +730,7 @@ log_returns = log_returns.dropna()
 
 print(f"Inner Join-ից հետո մնացած աշխատանքային օրերի քանակը: {len(log_returns)}\n")
 
-# 4. Նկարագրական Վիճակագրության Հաշվարկ
+# Նկարագրական Վիճակագրության Հաշվարկ
 stats_list = []
 for col in log_returns.columns:
     series = log_returns[col]
@@ -758,7 +758,7 @@ print("--- ՆԿԱՐԱԳՐԱԿԱՆ ՎԻՃԱԿԱԳՐՈՒԹՅՈՒՆ ---")
 print(desc_stats_df.to_string())
 print("\nԱղյուսակը պահպանվել է 'Նկարագրական_Վիճակագրություն.csv' ֆայլում:")
 
-# 5. Ռեժիմային փուլերով (Structural Breaks) Վիզուալիզացիա
+# Ռեժիմային փուլերով (Structural Breaks) Վիզուալիզացիա
 plt.figure(figsize=(16, 10))
 for i, col in enumerate(['BTC', 'S&P500', 'GOLD']):
     plt.subplot(3, 1, i+1)
@@ -781,7 +781,7 @@ log_returns = log_returns[desired_order]
 log_returns.to_csv('Աշխատանքային_Եկամտաբերություններ.csv', sep=';', encoding='utf-8-sig')
 
 
-#3
+#3 Յոհանսենի կոինտեգրացիոն թեստ
 
 
 import pandas as pd
@@ -802,7 +802,7 @@ prices_for_johansen = prices_for_johansen.dropna()
 desired_order = ['S&P500', 'GOLD', 'DXY', 'US10Y', 'ETH', 'BTC', 'QNT']
 prices_for_johansen = prices_for_johansen[desired_order]
 
-# 2. Johansen թեստի ֆունկցիան
+# Johansen թեստի ֆունկցիան
 def johansen_on_prices(df):
     # det_order=0 նշանակում է մոդելում առկա է միայն հաստատուն (constant)
     # k_ar_diff=1 նշանակում է 1 հապաղում տարբերություններում (համապատասխանում է VAR(1)-ին)
@@ -836,7 +836,7 @@ else:
     print("Ակտիվների միջև առկա է կոինտեգրացիա (VECM մոդելի կիրառման անհրաժեշտություն կա):")
 
 
-#4
+#4 VAR մոդելի օպտիմալ հապաղման (Lag) ընտրություն
 
 
 from statsmodels.tsa.api import VAR
@@ -853,7 +853,7 @@ optimal_lag = lag_selection.aic
 print(f"\nԱվտոմատ ընտրված օպտիմալ լագը ըստ AIC չափանիշի: {optimal_lag}")
 
 
-#5
+#5 VAR մոդելի գնահատում և մնացորդների դիագնոստիկա
 
 
 import pandas as pd
@@ -868,13 +868,13 @@ data = pd.read_csv('ՃՇԳՐՏՎԱԾ_Եկամտաբերություններ.csv'
 model = VAR(data)
 results = model.fit(1)
 
-# 2. Portmanteau (Q-stat) Test (Ավտոկորելացիայի ստուգում ողջ համակարգում)
+# Portmanteau (Q-stat) Test (Ավտոկորելացիայի ստուգում ողջ համակարգում)
 white_test = results.test_whiteness(nlags=10)
 print(f"2. Portmanteau Test (p-value): {white_test.pvalue:.4e}")
 if white_test.pvalue < 0.05:
     print("   -> Եզրակացություն: Առկա է ավտոկորելացիա (Մերժվում է H0):")
 
-# 3. ARCH-LM Test (Հետերոսկեդաստիկության ստուգում յուրաքանչյուր ակտիվի համար)
+# ARCH-LM Test (Հետերոսկեդաստիկության ստուգում յուրաքանչյուր ակտիվի համար)
 print("\n3. ARCH-LM Test յուրաքանչյուր շարքի մնացորդի համար (Lag=5):")
 residuals = results.resid
 for col in residuals.columns:
@@ -886,7 +886,7 @@ eigenvalues = np.linalg.eigvals(results.coefs[0])
 print(np.abs(eigenvalues))
 
 
-#6
+#6 Տատանողականության փոխանցման ինդեքսի (TSI) կայունության ստուգում
 
 
 import numpy as np
@@ -914,7 +914,7 @@ for h_val in [5,10, 15]:
     print(f"H={h_val} դեպքում TSI: {tsi_val:.2f}%")
 
 
-#7
+#7 Դիբոլդ-Յիլմազի տատանողականության փոխանցման մատրից և դինամիկա (Rolling Window)
 
 
 import pandas as pd
@@ -925,10 +925,10 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# 1. Բեռնում ենք տվյալները
+# Բեռնում ենք տվյալները
 data = pd.read_csv('ՃՇԳՐՏՎԱԾ_Եկամտաբերություններ.csv', index_col=0, parse_dates=True, sep=';')
 
-# 2. VAR Մոդելի կառուցում (Lag = 1)
+# VAR Մոդելի կառուցում (Lag = 1)
 lag_optimal = 1
 horizon = 10
 model = VAR(data)
@@ -948,7 +948,7 @@ for h in range(horizon):
 theta = num / den[:, None]
 theta_tilde = (theta / theta.sum(axis=1)[:, None]) * 100
 
-# 3. ՄԱՏՐԻՑԻ ՏՊՈՒՄ
+# ՄԱՏՐԻՑԻ ՏՊՈՒՄ
 cols = data.columns
 matrix_df = pd.DataFrame(theta_tilde, index=cols, columns=cols)
 
@@ -972,7 +972,7 @@ print(matrix_df.round(2).fillna(''))
 print(f"\nՎերջնական TSI: {tsi:.2f}%\n")
 
 
-# 4. ROLLING WINDOW TSI (150 օր)
+# ROLLING WINDOW TSI (150 օր)
 window = 150
 rolling_tsi = []
 dates = []
@@ -1013,7 +1013,7 @@ plt.savefig('Rolling_TSI_Lag1.png', dpi=300)
 print("\nԳրաֆիկը հաջողությամբ պահպանվել է որպես 'Rolling_TSI_Lag1.png':")
 
 
-#8
+#8 Զուտ տատանողականության փոխանցումների ջերմային քարտեզի (Net Spillover Heatmap) կառուցում
 
 
 import pandas as pd
@@ -1025,10 +1025,9 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# --- ԱԿՏԻՎՆԵՐԻ ՀԵՐԹԱԿԱՆՈՒԹՅԱՆ ՍԱՀՄԱՆՈՒՄ ---
 desired_order = ['S&P500', 'GOLD', 'DXY', 'US10Y', 'ETH', 'BTC', 'QNT']
 
-# 1. Տվյալների ներբեռնում
+# Տվյալների ներբեռնում
 print("Ներբեռնվում են աշխատանքային տվյալները...")
 data = pd.read_csv('Աշխատանքային_Եկամտաբերություններ.csv', index_col=0, parse_dates=True, sep=';')
 
@@ -1040,7 +1039,7 @@ data = data[desired_order]
 
 print(f"Հաջողությամբ բեռնվեց {data.shape[1]} ակտիվ և {data.shape[0]} աշխատանքային օր։")
 
-# 2. VAR մոդելի լագի ընտրություն
+# VAR մոդելի լագի ընտրություն
 print("\n--- VAR ՄՈԴԵԼԻ ԼԱԳԻ ԸՆՏՐՈՒԹՅՈՒՆ ---")
 model = VAR(data)
 lag_selection = model.select_order(maxlags=10)
@@ -1052,10 +1051,10 @@ if optimal_lag == 0:
 else:
     print(f"Ընտրված օպտիմալ լագը ըստ AIC-ի: {optimal_lag}")
 
-# 3. VAR մոդելի գնահատում
+# VAR մոդելի գնահատում
 var_fitted = model.fit(optimal_lag)
 
-# 4. ԳԵՆԵՐԱԼԻԶԱՑՎԱԾ (Generalized) FEVD-Ի ՀԱՇՎԱՐԿ
+# ԳԵՆԵՐԱԼԻԶԱՑՎԱԾ (Generalized) FEVD-Ի ՀԱՇՎԱՐԿ
 def generalized_fevd(var_results, horizon):
     K = var_results.neqs
     Sigma = var_results.sigma_u.values if hasattr(var_results.sigma_u, 'values') else var_results.sigma_u
@@ -1082,7 +1081,7 @@ forecast_horizon = 10
 decomp_matrix = generalized_fevd(var_fitted, forecast_horizon)
 assets = data.columns
 
-# 5. Spillover Աղյուսակի կառուցում
+# Spillover Աղյուսակի կառուցում
 spillover_df = pd.DataFrame(decomp_matrix, index=assets, columns=assets)
 
 own_variance = np.diag(spillover_df)
@@ -1103,7 +1102,7 @@ print(spillover_df)
 spillover_df.to_csv('Diebold_Yilmaz_Spillover_Table.csv', sep=';', decimal=',', encoding='utf-8-sig')
 print("\nԱղյուսակը պահպանվել է 'Diebold_Yilmaz_Spillover_Table.csv' ֆայլում:")
 
-# 6. Վիզուալիզացիա (Net Spillovers Heatmap)
+# Վիզուալիզացիա (Net Spillovers Heatmap)
 net_spillover_matrix = pd.DataFrame(0.0, index=assets, columns=assets)
 for i in assets:
     for j in assets:
@@ -1115,7 +1114,7 @@ plt.figure(figsize=(12, 10))
 sns.heatmap(net_spillover_matrix, annot=True, cmap='RdYlBu_r', center=0, fmt='.2f', linewidths=0.5, 
             annot_kws={"size": 10})
 
-# --- ԱՌԱՆՑՔՆԵՐԸ ԵՎ ՎԵՐՆԱԳԻՐԸ ---
+# ԱՌԱՆՑՔՆԵՐԸ ԵՎ ՎԵՐՆԱԳԻՐԸ
 plt.title('Զուտ Տատանողականության Փոխանցման Ջերմային Քարտեզ (Net Pairwise Spillovers)', fontsize=14, fontweight='bold', pad=20)
 plt.ylabel('Շոկը փոխանցող (Transmitter)', fontsize=12, fontweight='bold')
 plt.xlabel('Շոկը ստացող (Receiver)', fontsize=12, fontweight='bold')
@@ -1124,14 +1123,14 @@ plt.xticks(rotation=45, ha='right')
 plt.yticks(rotation=0)
 plt.tight_layout()
 
-# Պահպանում ենք ակադեմիական որակով (dpi=300)
+# Պահպանում ենք
 plt.savefig('Net_Spillover_Matrix.png', dpi=300)
 plt.show()
 
 print(f"\nՀամակարգի Ընդհանուր Spillover Ինդեքսը (TSI) կազմում է՝ {total_spillover:.2f}%")
 
 
-#9
+#9 Միաչափ GARCH մոդելների բաշխումների օպտիմալացում
 
 
 from arch import arch_model
@@ -1164,7 +1163,7 @@ for col in data.columns:
     print(f"{col}: Ըստ AIC -> {dist_aic}, Ըստ BIC -> {dist_bic}")
 
 
-#10
+#10 GARCH(1,1) պարամետրերի գնահատում և պահպանողականության (Persistence) հաշվարկ
 
 
 import pandas as pd
@@ -1209,7 +1208,7 @@ print("--- ՎԵՐՋՆԱԿԱՆ ԵՎ ՃՇԳՐԻՏ ԱՂՅՈՒՍԱԿ 3.3.1 ---")
 print(df_garch_final)
 
 
-#11
+#11 Դինամիկ պայմանական կորելացիաների (DCC-GARCH) մոդելավորում և վիզուալիզացիա
 
 
 import numpy as np
@@ -1222,7 +1221,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # -----------------------------------------------------------------------------
-# ՔԱՅԼ 1. ՍՏԱՆԴԱՐՏԱՑՎԱԾ ՄՆԱՑՈՐԴՆԵՐԻ (z_t) ՍՏԱՑՈՒՄ ՃԻՇՏ ԲԱՇԽՈՒՄՆԵՐՈՎ
+# ՍՏԱՆԴԱՐՏԱՑՎԱԾ ՄՆԱՑՈՐԴՆԵՐԻ (z_t) ՍՏԱՑՈՒՄ ՃԻՇՏ ԲԱՇԽՈՒՄՆԵՐՈՎ
 # -----------------------------------------------------------------------------
 
 # Ամրագրում ենք մեր ապացուցած ճշգրիտ բաշխումները
@@ -1253,7 +1252,7 @@ for col in assets:
     conditional_vols[col] = res.conditional_volatility
 
 # -----------------------------------------------------------------------------
-# ՔԱՅԼ 2. DCC-GARCH(1,1) ՄՈԴԵԼԻ ԿԱՌՈՒՑՈՒՄ ԵՎ R_t ԿՈՐԵԼԱՑԻԱՆԵՐԻ ՀԱՇՎԱՐԿ
+# DCC-GARCH(1,1) ՄՈԴԵԼԻ ԿԱՌՈՒՑՈՒՄ ԵՎ R_t ԿՈՐԵԼԱՑԻԱՆԵՐԻ ՀԱՇՎԱՐԿ
 # -----------------------------------------------------------------------------
 
 # Անկախ կորելացիոն մատրիցա (Unconditional Correlation Matrix - Q_bar)
@@ -1293,7 +1292,7 @@ print("Հաշվարկվում են դինամիկ պայմանական կորե�
 Q_dynamic, R_dynamic = dcc_filter([dcc_a, dcc_b], z_t, Q_bar)
 
 # -----------------------------------------------------------------------------
-# ՔԱՅԼ 3. ԱՐԴՅՈՒՆՔՆԵՐԻ ՎԻԶՈՒԱԼԻԶԱՑԻԱ (ՄԻՋԻՆԱՑՎԱԾ ԴԻՆԱՄԻԿ ԿՈՐԵԼԱՑԻԱՆԵՐ)
+# ԱՐԴՅՈՒՆՔՆԵՐԻ ՎԻԶՈՒԱԼԻԶԱՑԻԱ (ՄԻՋԻՆԱՑՎԱԾ ԴԻՆԱՄԻԿ ԿՈՐԵԼԱՑԻԱՆԵՐ)
 # -----------------------------------------------------------------------------
 
 # Որպեսզի ստանանք վերջնական Heatmap, հաշվում ենք ամբողջ ժամանակահատվածի միջին դինամիկ կորելացիաները
@@ -1307,7 +1306,7 @@ plt.title('DCC-GARCH(1,1) Միջինացված Դինամիկ Կորելացիա
 plt.savefig('DCC_Heatmap_Final.png', dpi=300, bbox_inches='tight')
 plt.show()
 # -----------------------------------------------------------------------------
-# ՔԱՅԼ 4. 3x4 ԳՐԱՖԻԿՆԵՐԻ ՑԱՆՑԸ 
+# 3x4 ԳՐԱՖԻԿՆԵՐԻ ՑԱՆՑԸ 
 # -----------------------------------------------------------------------------
 
 import matplotlib.pyplot as plt
@@ -1352,7 +1351,7 @@ plt.savefig('DCC_Dynamic_Correlations_3x4.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
-#12
+#12 ԱՄՆ դոլարի արժեզրկման ռիսկի մեքենայական հեջավորում (XGBoost Hedging - DXY/BTC)
 
 
 import yfinance as yf
@@ -1365,7 +1364,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # -------------------------------------------------------------------------
-# 1. ՏՎՅԱԼՆԵՐԻ ԲԵՌՆՈՒՄ (2018 - 2026)
+# ՏՎՅԱԼՆԵՐԻ ԲԵՌՆՈՒՄ (2018 - 2026)
 # -------------------------------------------------------------------------
 print("Բեռնվում են տվյալները...")
 tickers = {
@@ -1388,7 +1387,7 @@ data = pd.concat(df_list, axis=1).ffill().dropna()
 returns = data.pct_change().dropna()
 
 # -------------------------------------------------------------------------
-# 2. ԹԻՐԱԽ ԵՎ ՀԱՏԿԱՆԻՇՆԵՐ (TARGET & FEATURES)
+# ԹԻՐԱԽ ԵՎ ՀԱՏԿԱՆԻՇՆԵՐ (TARGET & FEATURES)
 # -------------------------------------------------------------------------
 returns['Target'] = (returns['DXY'] < 0).astype(int)
 
@@ -1402,7 +1401,7 @@ for col in features:
 ml_data = returns.dropna()
 
 # -------------------------------------------------------------------------
-# 3. 85/15 ԲԱԺԱՆՈՒՄ (TRAIN/TEST SPLIT)
+# 85/15 ԲԱԺԱՆՈՒՄ (TRAIN/TEST SPLIT)
 # -------------------------------------------------------------------------
 
 split_idx = int(len(ml_data) * 0.85)
@@ -1418,13 +1417,13 @@ X_train, y_train = train[feature_cols], train['Target']
 X_test, y_test = test[feature_cols], test['Target']
 
 # -------------------------------------------------------------------------
-# 4. XGBOOST ՄՈԴԵԼԱՎՈՐՈՒՄ
+# XGBOOST ՄՈԴԵԼԱՎՈՐՈՒՄ
 # -------------------------------------------------------------------------
 model = xgb.XGBClassifier(n_estimators=100, max_depth=3, learning_rate=0.05, random_state=42)
 model.fit(X_train, y_train)
 
 # -------------------------------------------------------------------------
-# 5. ՍԻՄՈՒԼՅԱՑԻԱ ԵՎ ՀԵՋԱՎՈՐՈՒՄ
+# ՍԻՄՈՒԼՅԱՑԻԱ ԵՎ ՀԵՋԱՎՈՐՈՒՄ
 # -------------------------------------------------------------------------
 test['Signal'] = model.predict(X_test)
 test['Strategy_Return'] = np.where(test['Signal'] == 1, test['BTC'], test['DXY'])
@@ -1433,7 +1432,7 @@ test['Cum_DXY'] = (1 + test['DXY']).cumprod() - 1
 test['Cum_Strategy'] = (1 + test['Strategy_Return']).cumprod() - 1
 
 # -------------------------------------------------------------------------
-# 6. ՎԻԶՈՒԱԼԻԶԱՑԻԱ
+# ՎԻԶՈՒԱԼԻԶԱՑԻԱ
 # -------------------------------------------------------------------------
 plt.figure(figsize=(12, 6))
 plt.plot(test.index, test['Cum_DXY'] * 100, label='Պասիվ Պորտֆել (DXY)', color='salmon', lw=1.5)
@@ -1447,7 +1446,7 @@ plt.savefig('XGBoost_Hedge_Final_Perfected.png', dpi=300)
 plt.show()
 
 
-#13
+#13 Պորտֆելային ռիսկերի վիճակագրական արբիտրաժ ռեժիմային փոխարկման (Regime-Switching) միջոցով
 
 
 import yfinance as yf
